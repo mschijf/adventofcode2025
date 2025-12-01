@@ -1,6 +1,5 @@
 package adventofcode
 
-import tool.coordinate.twodimensional.pos
 import kotlin.math.absoluteValue
 
 fun main() {
@@ -22,15 +21,11 @@ class Day01(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="TBD", hasInp
         var position = 50
         input.forEach {
             count0 += it.absoluteValue / 100
-            val effectiveClicks = it.absoluteValue % 100
-            if (it > 0) {
-                if (position != 0 && position + effectiveClicks >= 100)
-                    count0++
-            } else {
-                if (position != 0 && position - effectiveClicks <= 0)
-                    count0++
-            }
-            position = Math.floorMod( position + it, 100)
+            val effectiveClicks = it % 100
+            val nextPos = position + effectiveClicks
+            if (position != 0 && nextPos <= 0 || nextPos >= 100)
+                count0++
+            position = Math.floorMod( nextPos, 100)
         }
         return count0
     }
