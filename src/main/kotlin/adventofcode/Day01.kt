@@ -6,7 +6,7 @@ fun main() {
     Day01(test=false).showResult()
 }
 
-class Day01(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="TBD", hasInputFile = true) {
+class Day01(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Secret Entrance", hasInputFile = true) {
 
     private val input = inputLines.map { (if (it.first() == 'L') -1 else 1) * it.drop(1).toInt() }
 

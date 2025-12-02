@@ -1,9 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
-    application
+    kotlin("jvm") version "2.2.20"
 }
 
-group = "org.example"
+group = "ms"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -12,17 +11,11 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation(kotlin("reflect"))
 }
 
 tasks.test {
     useJUnitPlatform()
 }
-
 kotlin {
-    jvmToolchain(8)
-}
-
-application {
-    mainClass.set("MainKt")
+    jvmToolchain(21)
 }
