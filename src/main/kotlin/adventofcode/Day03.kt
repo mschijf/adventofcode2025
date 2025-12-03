@@ -31,7 +31,6 @@ class Day03(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Lobby", hasI
             list = list.drop(index+1)
             total = total * 10 + nextMax
         }
-        println(total)
         return total
     }
 //169709990062889
