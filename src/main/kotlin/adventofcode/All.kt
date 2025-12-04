@@ -26,7 +26,7 @@ fun runDay(dayNr: Int, test: Boolean, verbose: Boolean) {
 
         val obj = kClass.constructors.first().call(test)
         method!!.call(obj)
-    } catch(e: ClassNotFoundException) {
+    } catch(_: ClassNotFoundException) {
         if (verbose) {
             println("$className not implemented (yet)")
         }
