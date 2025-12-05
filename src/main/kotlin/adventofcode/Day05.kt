@@ -20,32 +20,26 @@ class Day05(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Cafeteria", 
     }
 
     override fun resultPartTwo(): Any {
-        var totalRange = mutableListOf<FreshRange>()
-        freshRangeList.sortedBy { it.first }.forEach { freshRange ->
-            val newTotal = mutableListOf<FreshRange>()
-            var working = freshRange
-            totalRange.forEach { total ->
-                if (freshRange.hasOverlap(total)) {
-                    working = combine(freshRange, total)
-                } else {
-                    newTotal += total
-                }
-            }
-            newTotal += working
-            totalRange = newTotal
-        }
-        return totalRange.sumOf {it.count()}
+        val combinedRanges = freshRangeList.fold(emptyList<FreshRange>()) { acc, freshRange -> acc.insertAndCombineInList(freshRange)}
+        return combinedRanges.sumOf { it.count() }
     }
 
     private fun Long.isFresh(): Boolean =
         freshRangeList.any{ it.containsIngredient(this)}
 
-    private fun combine(freshRange1: FreshRange, freshRange2: FreshRange) : FreshRange {
-        if (!freshRange1.hasOverlap(freshRange2))
-            println("ERRORRRRR")
-        return FreshRange(min(freshRange1.first, freshRange2.first), max(freshRange1.last, freshRange2.last))
+    private fun List<FreshRange>.insertAndCombineInList(newRange: FreshRange): List<FreshRange> {
+        val newTotal = mutableListOf<FreshRange>()
+        var growingRange = newRange
+        this.forEach { listedRange ->
+            if (listedRange.hasOverlap(growingRange)) {
+                growingRange = growingRange.combine(listedRange)
+            } else {
+                newTotal += listedRange
+            }
+        }
+        newTotal += growingRange
+        return newTotal
     }
-
 
 }
 
@@ -60,12 +54,13 @@ data class FreshRange(val first: Long, val last: Long) {
     fun containsIngredient(ingredient: Long): Boolean =
         ingredient in first..last
 
-    fun hasOverlap(other: FreshRange): Boolean {
-        if (other.last < this.first)
-            return false
-        if (other.first > this.last)
-            return false
-        return true
+    fun hasOverlap(other: FreshRange): Boolean =
+        !(other.last < this.first || other.first > this.last)
+
+    fun combine(otherRange: FreshRange) : FreshRange {
+        if (!this.hasOverlap(otherRange))
+            throw Exception("Cannot combine these two ranges")
+        return FreshRange(min(this.first, otherRange.first), max(this.last, otherRange.last))
     }
 
     fun count() = last - first + 1
