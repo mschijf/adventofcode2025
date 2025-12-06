@@ -1,6 +1,7 @@
 package adventofcode
 
 import tool.mylambdas.splitByCondition
+import kotlin.text.trim
 
 fun main() {
     Day06(test=false).showResult()
@@ -8,24 +9,20 @@ fun main() {
 
 /**
  * I had hard part with the second part of this one, since the trailing spaces in the input, are not 'saved'
- * in my data files (example, input) by IntelliJ. So, I had to add them programatically.
+ * in my data files (example, input) by IntelliJ. So, I had to add them programmatically.
+ *
+ * Later I decided to introduce the matrix classes, that helped a lot.
  */
 
 class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compactor", hasInputFile = true) {
 
     override fun resultPartOne(): Any {
-        val mathNumbers = inputLines
-            .dropLast(1)
-            .map { line ->
-                line.trim().split("\\s+".toRegex()).map {it.toLong()}
-            }
+        val matrix = LongMatrix.ofStringLines(inputLines.dropLast(1))
         val operators = inputLines.last().trim().split("\\s+".toRegex())
 
-        val x = mathNumbers
-            .transpose()
+        return operators
             .withIndex()
-            .sumOf { it.value.function(operators[it.index])}
-        return x
+            .sumOf { matrix.getCol(it.index).function(it.value) }
     }
 
     override fun resultPartTwo(): Any {
@@ -37,18 +34,6 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
             .withIndex()
             .sumOf { it.value.function(operators[it.index])}
         return x
-    }
-
-    private fun List<List<Long>>.transpose(): List<List<Long>> {
-        val transposedMatrix = mutableListOf<List<Long>>()
-        for (col in this.first().indices) {
-            val newRow = mutableListOf<Long>()
-            for (row in this.indices) {
-                newRow += this[row][col]
-            }
-            transposedMatrix += newRow
-        }
-        return transposedMatrix
     }
 
     private fun List<Long>.function(operator: String): Long {
@@ -79,4 +64,39 @@ class CharMatrix (inputLines: List<String>) {
 
     fun toColList(): List<String> = (0..colCount-1).map { col -> colString(col) }
     fun toRowList(): List<String> = matrixLines
+}
+
+data class LongMatrix private constructor (private val matrix: List<List<Long>>) {
+    val rowCount: Int = matrix.size
+    val colCount: Int = matrix.first().size
+
+    companion object {
+        fun ofLongLists(inputLongList: List<List<Long>>, default: Long = 0L): LongMatrix {
+            val maxCol = inputLongList.maxOf {it.size}
+            return LongMatrix(inputLongList.map { it + List(maxCol - it.size) {default} })
+        }
+
+        fun ofStringLists(inputStringList: List<List<String>>, default: Long = 0L): LongMatrix {
+            val inputLongList = inputStringList.map { line -> line.map { str -> str.toLong() } }
+            return ofLongLists(inputLongList, default)
+        }
+
+        fun ofStringLines(inputStringLines: List<String>, default: Long = 0L): LongMatrix {
+            val inputLongList = inputStringLines.map { line -> line.trim().split("\\s+".toRegex()) }
+            return ofStringLists(inputLongList, default)
+        }
+
+    }
+
+    operator fun get(row: Int, col: Int): Long {
+        return matrix[row][col]
+    }
+
+    operator fun get(row: Int): List<Long> {
+        return matrix[row]
+    }
+
+    fun getRow(row: Int): List<Long> = this[row]
+
+    fun getCol(col: Int): List<Long> = matrix.map { it[col] }
 }
