@@ -59,7 +59,7 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
             val operator = operatorLine[0]
             val newLength = operatorLine.determineNumberLength()
 
-            total += numberLines.functionPart2(operator, newLength)
+            total += numberLines.map{ it.take(newLength) }.functionPart2(operator)
 
             operatorLine = operatorLine.drop(newLength+1)
             for (i in numberLines.indices) {
@@ -87,9 +87,8 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
             ?: this.length
     }
 
-    private fun List<String>.functionPart2(operator: Char, newLength: Int): Long {
-        val numberList = this.map{ it.take(newLength) }
-        val newList = numberList.rightToLeft()
+    private fun List<String>.functionPart2(operator: Char): Long {
+        val newList = this.rightToLeft()
         return when (operator) {
             '*' -> newList.fold(1){acc, i -> acc * i}
             '+' -> newList.sum()
@@ -98,19 +97,24 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     }
 
     /**
-     * following the examples, we cannot interprete a space with a 0, but we have to ignore it
+     * we have a list of strings, each string has equal length, for example: " 12", "45 "
+     * first we need to 'transpose' that to column strings: " 4", "15", "2 "
+     * and those strings need to be translated to values: 4, 15, 2
      */
+
     private fun List<String>.rightToLeft(): List<Long> {
-        val newList = mutableListOf<Long>()
-        for (i in this.first().length-1 downTo 0) {
-            var newNumber = 0L
-            for (row in this.indices) {
-                if (this[row][i] != ' ')
-                    newNumber = 10 * newNumber + this[row][i].digitToIntOrNull()!!
-            }
-            newList += newNumber
-        }
-        return newList
+        return this.first().indices.map { col -> this.getColumn(col).columnToNumber()}
+    }
+
+    private fun List<String>.getColumn(col: Int) : String {
+        return this.map{it[col]}.joinToString("")
+    }
+
+    /**
+     * following the examples, we cannot interpret a space with a 0, but we have to ignore it
+     */
+    private fun String.columnToNumber() : Long {
+        return this.replace(" ", "").toLong()
     }
 }
 
