@@ -1,5 +1,7 @@
 package adventofcode
 
+import tool.mylambdas.splitByCondition
+
 fun main() {
     Day06(test=false).showResult()
 }
@@ -26,12 +28,15 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
         return x
     }
 
-    private fun List<Long>.function(operator: String): Long {
-        return when (operator) {
-            "*" -> this.fold(1){acc, i -> acc * i}
-            "+" -> this.sum()
-            else -> throw Exception("WEIRD")
-        }
+    override fun resultPartTwo(): Any {
+        val operators = inputLines.last().trim().split("\\s+".toRegex())
+        val matrix = CharMatrix(inputLines.dropLast(1))
+        val verticalNumberList = matrix.toColList().splitByCondition { it.isBlank() }
+        val mathNumbers = verticalNumberList.map { it.map { columnString -> columnString.toCephalopodNumber()}}
+        val x = mathNumbers
+            .withIndex()
+            .sumOf { it.value.function(operators[it.index])}
+        return x
     }
 
     private fun List<List<Long>>.transpose(): List<List<Long>> {
@@ -46,76 +51,32 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
         return transposedMatrix
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-
-    override fun resultPartTwo(): Any {
-        // add trailing spaces
-        val maxLineLength = inputLines.maxOf { it.length}
-        var operatorLine = inputLines.last().padEnd(maxLineLength)
-        val numberLines = inputLines.dropLast(1).map {it.padEnd(maxLineLength)}.toMutableList()
-
-        var total = 0L
-        while (operatorLine.isNotEmpty()) {
-            val operator = operatorLine[0]
-            val newLength = operatorLine.determineNumberLength()
-
-            total += numberLines.map{ it.take(newLength) }.functionPart2(operator)
-
-            operatorLine = operatorLine.drop(newLength+1)
-            for (i in numberLines.indices) {
-                numberLines[i] = numberLines[i].drop(newLength+1)
-            }
-        }
-
-
-        return total
-    }
-
-    /**
-     * input is an operator line, starting with an operator.
-     *
-     * the index of the operator in the operator line starts at the first digit from the left
-     * therefore, we search for the next operator
-     * if it is there, we know that the length of the numbers is between those two operators
-     *
-     */
-    private fun String.determineNumberLength(): Int {
-        assert (this[0] == '*' || this[0] == '+')
-        return this.drop(1)
-            .indexOfFirst { ch ->  ch == '*' || ch == '+'}
-            .takeIf { it >= 0 }
-            ?: this.length
-    }
-
-    private fun List<String>.functionPart2(operator: Char): Long {
-        val newList = this.rightToLeft()
+    private fun List<Long>.function(operator: String): Long {
         return when (operator) {
-            '*' -> newList.fold(1){acc, i -> acc * i}
-            '+' -> newList.sum()
+            "*" -> this.fold(1){acc, i -> acc * i}
+            "+" -> this.sum()
             else -> throw Exception("WEIRD")
         }
     }
 
     /**
-     * we have a list of strings, each string has equal length, for example: " 12", "45 "
-     * first we need to 'transpose' that to column strings: " 4", "15", "2 "
-     * and those strings need to be translated to values: 4, 15, 2
-     */
-
-    private fun List<String>.rightToLeft(): List<Long> {
-        return this.first().indices.map { col -> this.getColumn(col).columnToNumber()}
-    }
-
-    private fun List<String>.getColumn(col: Int) : String {
-        return this.map{it[col]}.joinToString("")
-    }
-
-    /**
      * following the examples, we cannot interpret a space with a 0, but we have to ignore it
      */
-    private fun String.columnToNumber() : Long {
+    private fun String.toCephalopodNumber() : Long {
         return this.replace(" ", "").toLong()
     }
 }
 
+class CharMatrix (inputLines: List<String>) {
+    // add trailing spaces, to make each line equal length
+    private val colCount = inputLines.maxOf { it.length }
+    private val matrixLines = inputLines.map { it.padEnd(colCount) }
 
+    val rowCount = matrixLines.size
+
+    fun rowString(row: Int): String = matrixLines[row]
+    fun colString(col: Int): String = matrixLines.map { it[col] }.joinToString("")
+
+    fun toColList(): List<String> = (0..colCount-1).map { col -> colString(col) }
+    fun toRowList(): List<String> = matrixLines
+}
