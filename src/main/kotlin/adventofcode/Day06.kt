@@ -1,6 +1,8 @@
 package adventofcode
 
+import tool.math.Matrix
 import tool.mylambdas.splitByCondition
+import kotlin.collections.map
 import kotlin.text.trim
 
 fun main() {
@@ -17,7 +19,12 @@ fun main() {
 class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compactor", hasInputFile = true) {
 
     override fun resultPartOne(): Any {
-        val matrix = LongMatrix.ofStringLines(inputLines.dropLast(1))
+        val llLong = inputLines
+            .dropLast(1)
+            .map { line -> line.trim().split("\\s+".toRegex()).map { str -> str.toLong() }}
+
+        val matrix = Matrix.of(llLong, 0L)
+
         val operators = inputLines.last().trim().split("\\s+".toRegex())
 
         return operators
@@ -26,8 +33,11 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     }
 
     override fun resultPartTwo(): Any {
+        val llChar = inputLines
+            .dropLast(1)
+            .map { it.map {ch -> ch}}
+        val matrix = Matrix.of(llChar, ' ')
         val operators = inputLines.last().trim().split("\\s+".toRegex())
-        val matrix = CharMatrix.of(inputLines.dropLast(1))
         val verticalNumberList = (0..matrix.colCount-1)
             .map { matrix.getCol(it).joinToString("") }
             .splitByCondition { it.isBlank() }
@@ -54,48 +64,52 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     }
 }
 
-data class CharMatrix private constructor (private val matrix: List<List<Char>>) {
-    // add trailing spaces, to make each line equal length
-    val rowCount: Int = matrix.size
-    val colCount: Int = matrix.first().size
+//
+// Note: CharMatrix and LongMatrix below, replaced by a generic Matrix in the math package
+//
 
-    companion object {
-        fun of (inputLines: List<String>): CharMatrix {
-            val colCount = inputLines.maxOf { it.length }
-            return CharMatrix (inputLines.map { it.padEnd(colCount).toList() } )
-        }
-    }
-
-    operator fun get(row: Int, col: Int): Char = matrix[row][col]
-    operator fun get(row: Int): List<Char> = matrix[row]
-    fun getRow(row: Int): List<Char> = this[row]
-    fun getCol(col: Int): List<Char> = matrix.map { it[col] }
-}
-
-data class LongMatrix private constructor (private val matrix: List<List<Long>>) {
-    val rowCount: Int = matrix.size
-    val colCount: Int = matrix.first().size
-
-    companion object {
-        fun ofLongLists(inputLongList: List<List<Long>>, default: Long = 0L): LongMatrix {
-            val maxCol = inputLongList.maxOf {it.size}
-            return LongMatrix(inputLongList.map { it + List(maxCol - it.size) {default} })
-        }
-
-        fun ofStringLists(inputStringList: List<List<String>>, default: Long = 0L): LongMatrix {
-            val inputLongList = inputStringList.map { line -> line.map { str -> str.toLong() } }
-            return ofLongLists(inputLongList, default)
-        }
-
-        fun ofStringLines(inputStringLines: List<String>, default: Long = 0L): LongMatrix {
-            val inputLongList = inputStringLines.map { line -> line.trim().split("\\s+".toRegex()) }
-            return ofStringLists(inputLongList, default)
-        }
-
-    }
-
-    operator fun get(row: Int, col: Int): Long = matrix[row][col]
-    operator fun get(row: Int): List<Long> = matrix[row]
-    fun getRow(row: Int): List<Long> = this[row]
-    fun getCol(col: Int): List<Long> = matrix.map { it[col] }
-}
+//data class CharMatrix private constructor (private val matrix: List<List<Char>>) {
+//    // add trailing spaces, to make each line equal length
+//    val rowCount: Int = matrix.size
+//    val colCount: Int = matrix.first().size
+//
+//    companion object {
+//        fun of (inputLines: List<String>): CharMatrix {
+//            val colCount = inputLines.maxOf { it.length }
+//            return CharMatrix (inputLines.map { it.padEnd(colCount).toList() } )
+//        }
+//    }
+//
+//    operator fun get(row: Int, col: Int): Char = matrix[row][col]
+//    operator fun get(row: Int): List<Char> = matrix[row]
+//    fun getRow(row: Int): List<Char> = this[row]
+//    fun getCol(col: Int): List<Char> = matrix.map { it[col] }
+//}
+//
+//data class LongMatrix private constructor (private val matrix: List<List<Long>>) {
+//    val rowCount: Int = matrix.size
+//    val colCount: Int = matrix.first().size
+//
+//    companion object {
+//        fun ofLongLists(inputLongList: List<List<Long>>, default: Long = 0L): LongMatrix {
+//            val maxCol = inputLongList.maxOf {it.size}
+//            return LongMatrix(inputLongList.map { it + List(maxCol - it.size) {default} })
+//        }
+//
+//        fun ofStringLists(inputStringList: List<List<String>>, default: Long = 0L): LongMatrix {
+//            val inputLongList = inputStringList.map { line -> line.map { str -> str.toLong() } }
+//            return ofLongLists(inputLongList, default)
+//        }
+//
+//        fun ofStringLines(inputStringLines: List<String>, default: Long = 0L): LongMatrix {
+//            val inputLongList = inputStringLines.map { line -> line.trim().split("\\s+".toRegex()) }
+//            return ofStringLists(inputLongList, default)
+//        }
+//
+//    }
+//
+//    operator fun get(row: Int, col: Int): Long = matrix[row][col]
+//    operator fun get(row: Int): List<Long> = matrix[row]
+//    fun getRow(row: Int): List<Long> = this[row]
+//    fun getCol(col: Int): List<Long> = matrix.map { it[col] }
+//}
