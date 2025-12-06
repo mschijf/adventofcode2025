@@ -13,7 +13,7 @@ fun main() {
  * I had hard part with the second part of this one, since the trailing spaces in the input, are not 'saved'
  * in my data files (example, input) by IntelliJ. So, I had to add them programmatically.
  *
- * Later I decided to introduce the matrix classes, that helped a lot.
+ * Later I decided to introduce the matrix classes, finalyy replaced by one generic matrix class, that helped a lot.
  */
 
 class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compactor", hasInputFile = true) {
@@ -23,25 +23,25 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
             .dropLast(1)
             .map { line -> line.trim().split("\\s+".toRegex()).map { str -> str.toLong() }}
 
-        val matrix = Matrix.of(llLong, 0L)
-
+        val numberMatrix = Matrix.of(llLong, 0L)
         val operators = inputLines.last().trim().split("\\s+".toRegex())
 
         return operators
             .withIndex()
-            .sumOf { matrix.getCol(it.index).function(it.value) }
+            .sumOf { numberMatrix.getCol(it.index).function(it.value) }
     }
 
     override fun resultPartTwo(): Any {
         val llChar = inputLines
             .dropLast(1)
             .map { it.map {ch -> ch}}
-        val matrix = Matrix.of(llChar, ' ')
+        val charMatrix = Matrix.of(llChar, ' ')
         val operators = inputLines.last().trim().split("\\s+".toRegex())
-        val verticalNumberList = (0..matrix.colCount-1)
-            .map { matrix.getCol(it).joinToString("") }
-            .splitByCondition { it.isBlank() }
-        val mathNumbers = verticalNumberList.map { it.map { columnString -> columnString.toCephalopodNumber()}}
+
+        val mathNumbers = (0..charMatrix.colCount-1)
+            .map { idx -> charMatrix.getCol(idx).joinToString("") }
+            .map { columnString -> columnString.toCephalopodNumber()}
+            .splitByCondition { it == -1L }
 
         return operators
             .withIndex()
@@ -60,7 +60,7 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
      * following the examples, we cannot interpret a space with a 0, but we have to ignore it
      */
     private fun String.toCephalopodNumber() : Long {
-        return this.replace(" ", "").toLong()
+        return this.replace(" ", "").toLongOrNull() ?: -1L
     }
 }
 
