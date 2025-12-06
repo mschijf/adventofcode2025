@@ -27,13 +27,13 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
 
     override fun resultPartTwo(): Any {
         val operators = inputLines.last().trim().split("\\s+".toRegex())
-        val matrix = CharMatrix(inputLines.dropLast(1))
-        val verticalNumberList = matrix.toColList().splitByCondition { it.isBlank() }
+        val matrix = CharMatrix.of(inputLines.dropLast(1))
+        val verticalNumberList = (0..matrix.colCount-1).map { matrix.colString(it) }.splitByCondition { it.isBlank() }
         val mathNumbers = verticalNumberList.map { it.map { columnString -> columnString.toCephalopodNumber()}}
-        val x = mathNumbers
+
+        return operators
             .withIndex()
-            .sumOf { it.value.function(operators[it.index])}
-        return x
+            .sumOf { mathNumbers[it.index].function( it.value) }
     }
 
     private fun List<Long>.function(operator: String): Long {
@@ -52,18 +52,20 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     }
 }
 
-class CharMatrix (inputLines: List<String>) {
+data class CharMatrix private constructor (private val matrix: List<String>) {
     // add trailing spaces, to make each line equal length
-    private val colCount = inputLines.maxOf { it.length }
-    private val matrixLines = inputLines.map { it.padEnd(colCount) }
+    val rowCount: Int = matrix.size
+    val colCount: Int = matrix.first().length
 
-    val rowCount = matrixLines.size
+    companion object {
+        fun of (inputLines: List<String>): CharMatrix {
+            val colCount = inputLines.maxOf { it.length }
+            return CharMatrix (inputLines.map { it.padEnd(colCount) } )
+        }
+    }
 
-    fun rowString(row: Int): String = matrixLines[row]
-    fun colString(col: Int): String = matrixLines.map { it[col] }.joinToString("")
-
-    fun toColList(): List<String> = (0..colCount-1).map { col -> colString(col) }
-    fun toRowList(): List<String> = matrixLines
+    fun rowString(row: Int): String = matrix[row]
+    fun colString(col: Int): String = matrix.map { it[col] }.joinToString("")
 }
 
 data class LongMatrix private constructor (private val matrix: List<List<Long>>) {
