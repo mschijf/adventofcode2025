@@ -28,7 +28,9 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     override fun resultPartTwo(): Any {
         val operators = inputLines.last().trim().split("\\s+".toRegex())
         val matrix = CharMatrix.of(inputLines.dropLast(1))
-        val verticalNumberList = (0..matrix.colCount-1).map { matrix.colString(it) }.splitByCondition { it.isBlank() }
+        val verticalNumberList = (0..matrix.colCount-1)
+            .map { matrix.getCol(it).joinToString("") }
+            .splitByCondition { it.isBlank() }
         val mathNumbers = verticalNumberList.map { it.map { columnString -> columnString.toCephalopodNumber()}}
 
         return operators
@@ -52,20 +54,22 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
     }
 }
 
-data class CharMatrix private constructor (private val matrix: List<String>) {
+data class CharMatrix private constructor (private val matrix: List<List<Char>>) {
     // add trailing spaces, to make each line equal length
     val rowCount: Int = matrix.size
-    val colCount: Int = matrix.first().length
+    val colCount: Int = matrix.first().size
 
     companion object {
         fun of (inputLines: List<String>): CharMatrix {
             val colCount = inputLines.maxOf { it.length }
-            return CharMatrix (inputLines.map { it.padEnd(colCount) } )
+            return CharMatrix (inputLines.map { it.padEnd(colCount).toList() } )
         }
     }
 
-    fun rowString(row: Int): String = matrix[row]
-    fun colString(col: Int): String = matrix.map { it[col] }.joinToString("")
+    operator fun get(row: Int, col: Int): Char = matrix[row][col]
+    operator fun get(row: Int): List<Char> = matrix[row]
+    fun getRow(row: Int): List<Char> = this[row]
+    fun getCol(col: Int): List<Char> = matrix.map { it[col] }
 }
 
 data class LongMatrix private constructor (private val matrix: List<List<Long>>) {
@@ -90,15 +94,8 @@ data class LongMatrix private constructor (private val matrix: List<List<Long>>)
 
     }
 
-    operator fun get(row: Int, col: Int): Long {
-        return matrix[row][col]
-    }
-
-    operator fun get(row: Int): List<Long> {
-        return matrix[row]
-    }
-
+    operator fun get(row: Int, col: Int): Long = matrix[row][col]
+    operator fun get(row: Int): List<Long> = matrix[row]
     fun getRow(row: Int): List<Long> = this[row]
-
     fun getCol(col: Int): List<Long> = matrix.map { it[col] }
 }
