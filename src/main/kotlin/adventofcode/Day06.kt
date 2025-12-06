@@ -34,6 +34,19 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
         }
     }
 
+    private fun List<List<Long>>.transpose(): List<List<Long>> {
+        val transposedMatrix = mutableListOf<List<Long>>()
+        for (col in this.first().indices) {
+            val newRow = mutableListOf<Long>()
+            for (row in this.indices) {
+                newRow += this[row][col]
+            }
+            transposedMatrix += newRow
+        }
+        return transposedMatrix
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     override fun resultPartTwo(): Any {
         // add trailing spaces
@@ -58,17 +71,24 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
         return total
     }
 
+    /**
+     * input is an operator line, starting with an operator.
+     *
+     * the index of the operator in the operator line starts at the first digit from the left
+     * therefore, we search for the next operator
+     * if it is there, we know that the length of the numbers is between those two operators
+     *
+     */
     private fun String.determineNumberLength(): Int {
         assert (this[0] == '*' || this[0] == '+')
-        var i = 1
-        while (i < this.length && this[i] == ' ')
-            i++
-        return if (i >= this.length) i else i-1
+        return this.drop(1)
+            .indexOfFirst { ch ->  ch == '*' || ch == '+'}
+            .takeIf { it >= 0 }
+            ?: this.length
     }
 
     private fun List<String>.functionPart2(operator: Char, newLength: Int): Long {
-        val numberList = this.map{it.take(newLength)}
-
+        val numberList = this.map{ it.take(newLength) }
         val newList = numberList.rightToLeft()
         return when (operator) {
             '*' -> newList.fold(1){acc, i -> acc * i}
@@ -77,6 +97,9 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
         }
     }
 
+    /**
+     * following the examples, we cannot interprete a space with a 0, but we have to ignore it
+     */
     private fun List<String>.rightToLeft(): List<Long> {
         val newList = mutableListOf<Long>()
         for (i in this.first().length-1 downTo 0) {
@@ -88,23 +111,6 @@ class Day06(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Trash Compac
             newList += newNumber
         }
         return newList
-    }
-
-    private fun String.getDigit(i: Int): Int {
-        return if (i < this.length) this[i].digitToIntOrNull()!! else 0
-    }
-
-
-    private fun List<List<Long>>.transpose(): List<List<Long>> {
-        val transposedMatrix = mutableListOf<List<Long>>()
-        for (col in this.first().indices) {
-            val newRow = mutableListOf<Long>()
-            for (row in this.indices) {
-                newRow += this[row][col]
-            }
-            transposedMatrix += newRow
-        }
-        return transposedMatrix
     }
 }
 
