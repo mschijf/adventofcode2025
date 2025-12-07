@@ -26,22 +26,27 @@ abstract class PuzzleSolverAbstract (
         println("==================================================================")
     }
 
-    fun showResultShort() {
-        println("Day $dayOfMonth (${if (test) "test" else "real"} input) $puzzleName")
-        print("   ")
-        printResult(1) { resultPartOne().toString() }
-        print("   ")
-        printResult(2) { resultPartTwo().toString() }
-        println("==================================================================")
-    }
-
-    fun showResultTimeOnly() {
-        print(" ${dayOfMonth.toString().padStart(2, ' ')} ${puzzleName.padEnd(30, ' ')}: ")
+//    fun showResultShort() {
+//        println("Day $dayOfMonth (${if (test) "test" else "real"} input) $puzzleName")
+//        print("   ")
+//        printResult(1) { resultPartOne().toString() }
+//        print("   ")
+//        printResult(2) { resultPartTwo().toString() }
+//        println("==================================================================")
+//    }
+//
+//    fun showResultTimeOnly() {
+//        val result = executeOnly()
+//        print(" ${result.dayOfMonth.toString().padStart(2, ' ')} ${result.name.padEnd(30, ' ')}: ")
+//
+//        print("%4d.%03d ms   ".format(result.timePassedPart1Ns / 1_000_000, result.timePassedPart1Ns % 1_000))
+//        print("%4d.%03d ms   ".format(result.timePassedPart2Ns / 1_000_000, result.timePassedPart2Ns % 1_000))
+//    }
+//
+    fun executeOnly(): PuzzleResultData{
         val timePassed1 = getResultTimeOnly() { resultPartOne() }
         val timePassed2 = getResultTimeOnly() { resultPartTwo() }
-
-        print("%4d.%03d ms   ".format(timePassed1 / 1_000_000, timePassed1 % 1_000))
-        print("%4d.%03d ms   ".format(timePassed2 / 1_000_000, timePassed2 % 1_000))
+        return PuzzleResultData(dayOfMonth, puzzleName, timePassed1, timePassed2)
     }
 
     private fun printResult(puzzlePart: Int, getResult: () -> String ) {

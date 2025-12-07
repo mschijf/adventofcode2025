@@ -2,48 +2,51 @@ package adventofcode
 
 fun main() {
     val test = false
-    val executeLevel = ExecuteLevel.TIMEONLY
+    val verbose = false
 
-    if (executeLevel == ExecuteLevel.VERBOSE) {
-        (1..25).forEach { dayNr -> runDay(dayNr, test=test, executeLevel) }
+    if (verbose) {
+        (1..25).forEach { dayNr -> runDay(dayNr, test=test, true) }
     } else {
-        runDay(0, test=false, executeLevel)
         println()
-        println("Day Name                               Puzzle 1      Puzzle 2       Init")
-        println("------------------------------------------------------------------------")
-        (1..25).forEach { dayNr -> runDay(dayNr, test=false, executeLevel) }
-        println("------------------------------------------------------------------------")
+        println("Day Name                                   Init      Puzzle 1      Puzzle 2")
+        println("---------------------------------------------------------------------------")
+        runDay(1, test=false, false, true)
+        (1..25).forEach { dayNr -> runDay(dayNr, test=false, false) }
+        println("---------------------------------------------------------------------------")
 
     }
 }
 
-fun runDay(dayNr: Int, test: Boolean, executeLevel: ExecuteLevel) {
+fun runDay(dayNr: Int, test: Boolean, verbose: Boolean, warmingUp: Boolean = false) {
     val className = "Day%02d".format(dayNr)
     val packageName = "adventofcode"
     try {
         val startTime = System.nanoTime()
         val kClass = Class.forName("$packageName.$className").kotlin
-        val methodName = when (executeLevel) {
-            ExecuteLevel.VERBOSE -> "showResultShort"
-            ExecuteLevel.TIMEONLY -> "showResultTimeOnly"
-            ExecuteLevel.EXECUTEONLY -> "onlyExecute"
-        }
+        val methodName = if (verbose) "showResultShort" else "executeOnly"
         val method = kClass.members.find { it.name == methodName }
         val obj = kClass.constructors.first().call(test)
-        val timePassed = System.nanoTime() - startTime
-        method!!.call(obj)
-        print("%d.%03d ms   ".format(timePassed / 1_000_000, timePassed % 1_000))
-        println()
+        val timePassed0 = System.nanoTime() - startTime
+        val response = method!!.call(obj)
+        if (!verbose) {
+            val result = response as PuzzleResultData
+            if (warmingUp) {
+                print("    ${"Warming up ...".padEnd(30, ' ')}: ")
+                print("%4d.%03d ms   ".format(timePassed0 / 1_000_000, timePassed0 % 1_000))
+            } else {
+                print(" ${result.dayOfMonth.toString().padStart(2, ' ')} ${result.name.padEnd(30, ' ')}: ")
+                print("%4d.%03d ms   ".format(timePassed0 / 1_000_000, timePassed0 % 1_000))
+                print("%4d.%03d ms   ".format(result.timePassedPart1Ns / 1_000_000, result.timePassedPart1Ns % 1_000))
+                print("%4d.%03d ms   ".format(result.timePassedPart2Ns / 1_000_000, result.timePassedPart2Ns % 1_000))
+            }
+            println()
+        }
 
     } catch (_: ClassNotFoundException) {
-        if (executeLevel == ExecuteLevel.VERBOSE) {
+        if (verbose) {
             println("$className not implemented (yet)")
         }
     } catch (otherE: Exception) {
         println("$className runs with exception ${otherE.cause}")
     }
-}
-
-enum class ExecuteLevel {
-    VERBOSE, TIMEONLY, EXECUTEONLY
 }
