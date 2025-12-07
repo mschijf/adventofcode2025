@@ -14,23 +14,25 @@ class Day07(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Laboratories
     private val manifoldDiagramHeight = manifoldDiagram.keys.maxOf { it.y } + 1
 
     override fun resultPartOne(): Any {
-        var beamsOnCurrentLine = setOf<Point>(start)
-        val totalBeams = beamsOnCurrentLine.toMutableSet()
-
+        var beamsOnCurrentLine = setOf(start)
+        var splitCount = 0
         repeat(manifoldDiagramHeight) {
-            beamsOnCurrentLine = beamsOnCurrentLine.flatMap { beam -> beam.goDown() }.toSet()
-            totalBeams += beamsOnCurrentLine
+            splitCount += beamsOnCurrentLine.count { beam -> beam.south() in splitterSet}
+            beamsOnCurrentLine = beamsOnCurrentLine.goDownOneLine()
         }
 
-        return totalBeams.map { beam -> beam.south() }.toSet().intersect(splitterSet).count()
+        return splitCount
+    }
+
+    private fun Set<Point>.goDownOneLine(): Set<Point> {
+        return this.flatMap { beam -> beam.goDown() }.toSet()
     }
 
     private fun Point.goDown(): Set<Point> {
-        val newPlace = this.south()
-        return if (newPlace in splitterSet) {
-            setOf(newPlace.west(), newPlace.east())
+        return if (this.south() in splitterSet) {
+            setOf(this.southwest(), this.southeast())
         } else {
-            setOf(newPlace)
+            setOf(this.south())
         }
     }
 
@@ -38,17 +40,20 @@ class Day07(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Laboratories
         return countPaths(start)
     }
 
-    val cache = mutableMapOf<Point, Long>()
+    private val cache = mutableMapOf<Point, Long>()
     private fun countPaths(current:Point) : Long {
         if (current.y >= manifoldDiagramHeight)
             return 1
+
         if (current in cache)
             return cache[current]!!
+
         val count = if (current in splitterSet) {
             countPaths(current.east()) + countPaths(current.west())
         } else {
             countPaths(current.south())
         }
+
         cache[current] = count
         return count
     }
