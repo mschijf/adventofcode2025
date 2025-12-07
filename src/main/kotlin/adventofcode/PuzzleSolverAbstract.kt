@@ -40,27 +40,22 @@ abstract class PuzzleSolverAbstract (
         val timePassed1 = getResultTimeOnly() { resultPartOne() }
         val timePassed2 = getResultTimeOnly() { resultPartTwo() }
 
-        print("%d.%03d sec  ".format(timePassed1 / 1000, timePassed1 % 1000))
-        print("%d.%03d sec  ".format(timePassed2 / 1000, timePassed2 % 1000))
-    }
-
-    fun onlyExecute() {
-        val x = resultPartOne().toString()
-        val y = resultPartTwo().toString()
+        print("%4d.%03d ms   ".format(timePassed1 / 1_000_000, timePassed1 % 1_000))
+        print("%4d.%03d ms   ".format(timePassed2 / 1_000_000, timePassed2 % 1_000))
     }
 
     private fun printResult(puzzlePart: Int, getResult: () -> String ) {
-        val startTime = System.currentTimeMillis()
+        val startTime = System.nanoTime()
         val result = getResult()
-        val timePassed = System.currentTimeMillis() - startTime
-        print("Result part $puzzlePart: $result (after %d.%03d sec)".format(timePassed / 1000, timePassed % 1000))
+        val timePassed = System.nanoTime() - startTime
+        print("Result part $puzzlePart: $result (after %d.%03d ms)".format(timePassed / 1_000_000, timePassed % 1_000))
         println()
     }
 
     private fun getResultTimeOnly(getResult: () -> Any ): Long {
-        val startTime = System.currentTimeMillis()
+        val startTime = System.nanoTime()
         getResult()
-        val timePassed = System.currentTimeMillis() - startTime
+        val timePassed = System.nanoTime() - startTime
         return timePassed
     }
 
