@@ -2,32 +2,39 @@ package adventofcode
 
 fun main() {
     val test = false
-    val verbose = false
+    val executeLevel = ExecuteLevel.TIMEONLY
 
-    if (verbose) {
-        (1..25).forEach { dayNr -> runDay(dayNr, test=test, verbose=true) }
+    if (executeLevel == ExecuteLevel.VERBOSE) {
+        (1..25).forEach { dayNr -> runDay(dayNr, test=test, executeLevel) }
     } else {
-        println("Day Name                            Puzzle 1   Puzzle 2")
-        println("--------------------------------------------------------")
-        (1..25).forEach { dayNr -> runDay(dayNr, test=false, verbose=false) }
-        println("--------------------------------------------------------")
+        runDay(0, test=false, executeLevel)
+        println("Day Name                            Puzzle 1   Puzzle 2   Init    ")
+        println("-------------------------------------------------------------------")
+        (1..25).forEach { dayNr -> runDay(dayNr, test=false, executeLevel) }
+        println("-------------------------------------------------------------------")
     }
 }
 
-fun runDay(dayNr: Int, test: Boolean, verbose: Boolean) {
+fun runDay(dayNr: Int, test: Boolean, executeLevel: ExecuteLevel) {
     val className = "Day%02d".format(dayNr)
     val packageName = "adventofcode"
     try {
+        val startTime = System.currentTimeMillis()
         val kClass = Class.forName("$packageName.$className").kotlin
-        val method = if (verbose)
-            kClass.members.find { it.name == "showResultShort" }
-        else
-            kClass.members.find { it.name == "showResultTimeOnly" }
-
+        val methodName = when (executeLevel) {
+            ExecuteLevel.VERBOSE -> "showResultShort"
+            ExecuteLevel.TIMEONLY -> "showResultTimeOnly"
+            ExecuteLevel.EXECUTEONLY -> "onlyExecute"
+        }
+        val method = kClass.members.find { it.name == methodName }
         val obj = kClass.constructors.first().call(test)
+        val timePassed = System.currentTimeMillis() - startTime
         method!!.call(obj)
-    } catch(_: ClassNotFoundException) {
-        if (verbose) {
+        print("%d.%03d sec  ".format(timePassed / 1000, timePassed % 1000))
+        println()
+
+    } catch (_: ClassNotFoundException) {
+        if (executeLevel == ExecuteLevel.VERBOSE) {
             println("$className not implemented (yet)")
         }
     } catch (otherE: Exception) {
@@ -35,3 +42,6 @@ fun runDay(dayNr: Int, test: Boolean, verbose: Boolean) {
     }
 }
 
+enum class ExecuteLevel {
+    VERBOSE, TIMEONLY, EXECUTEONLY
+}

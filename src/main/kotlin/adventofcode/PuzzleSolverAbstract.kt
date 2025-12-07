@@ -41,10 +41,13 @@ abstract class PuzzleSolverAbstract (
         val timePassed2 = getResultTimeOnly() { resultPartTwo() }
 
         print("%d.%03d sec  ".format(timePassed1 / 1000, timePassed1 % 1000))
-        print("%d.%03d sec".format(timePassed2 / 1000, timePassed2 % 1000))
-        println()
+        print("%d.%03d sec  ".format(timePassed2 / 1000, timePassed2 % 1000))
     }
 
+    fun onlyExecute() {
+        val x = resultPartOne().toString()
+        val y = resultPartTwo().toString()
+    }
 
     private fun printResult(puzzlePart: Int, getResult: () -> String ) {
         val startTime = System.currentTimeMillis()
