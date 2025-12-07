@@ -7,3 +7,4 @@ fun IntRange.overlaps(other:IntRange): Boolean {
 fun IntRange.size(): Int {
     return this.last - this.first + 1
 }
+
