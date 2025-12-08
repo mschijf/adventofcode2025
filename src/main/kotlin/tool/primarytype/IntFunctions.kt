@@ -53,10 +53,10 @@ fun Long.log10(): Int {
 }
 
 
-fun Int.digitLength() = this.toLong().digitLength().toInt()
+fun Int.digitLength() = this.toLong().digitLength()
 fun Long.digitLength() = this.log10()+1
 
-fun Int.digitSum() = this.toLong().digitSum().toInt()
+fun Int.digitSum() = this.toLong().digitSum()
 fun Long.digitSum(): Long {
     var sum = 0L
     var base = this
@@ -66,4 +66,7 @@ fun Long.digitSum(): Long {
     }
     return sum
 }
+
+fun Int.sqr() = this.toLong().sqr().toInt()
+fun Long.sqr() = this*this
 

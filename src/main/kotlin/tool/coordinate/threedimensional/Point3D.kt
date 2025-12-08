@@ -1,6 +1,8 @@
 package tool.coordinate.threedimensional
 
+import tool.primarytype.sqr
 import kotlin.math.absoluteValue
+import kotlin.math.sqrt
 
 data class Point3D(val x: Int, val y: Int, val z: Int) {
 
@@ -13,6 +15,7 @@ data class Point3D(val x: Int, val y: Int, val z: Int) {
     operator fun minus(other: Point3D): Point3D = plusXYZ(-other.x, -other.y, -other.z)
 
     fun distanceTo(otherPos: Point3D) = (otherPos.x - x).absoluteValue + (otherPos.y - y).absoluteValue + (otherPos.z - z).absoluteValue
+    fun eucledianDistance(other: Point3D): Double = sqrt( 0.0 + (this.x - other.x).sqr() + (this.y - other.y).sqr() + (this.z - other.z).sqr() )
 
     companion object {
         fun of(input: String): Point3D = input
@@ -38,6 +41,9 @@ data class Point3DLong(val x: Long, val y: Long, val z: Long) {
     operator fun minus(other: Point3DLong): Point3DLong = plusXYZ(-other.x, -other.y, -other.z)
 
     fun distanceTo(otherPos: Point3DLong) = (otherPos.x - x).absoluteValue + (otherPos.y - y).absoluteValue + (otherPos.z - z).absoluteValue
+
+    fun eucledianDistance(other: Point3DLong): Double = sqrt( 0.0 + (this.x - other.x).sqr() + (this.y - other.y).sqr() + (this.z - other.z).sqr() )
+
 
     companion object {
         fun of(input: String): Point3DLong = input
