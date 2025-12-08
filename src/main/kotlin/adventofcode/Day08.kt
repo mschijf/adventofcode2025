@@ -24,14 +24,16 @@ class Day08(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Playground",
 
     override fun resultPartTwo(): Any {
         val circuitList = mutableListOf<MutableSet<Point3DLong>>()
-        var idx = 0
-        var pair = coordinatePairs[0]
-        while (circuitList.sumOf { it.size } < coordinateList.size) {
-            pair = coordinatePairs[idx]
-            circuitList.addPair(pair)
-            idx++
+
+        var lastPair = coordinatePairs[0]
+        for (p in coordinatePairs) {
+            circuitList.addPair(p)
+            lastPair = p
+            if (circuitList.sumOf { it.size } >= coordinateList.size)
+                break
         }
-        return pair.first.x * pair.second.x
+
+        return lastPair.first.x * lastPair.second.x
     }
 
 
