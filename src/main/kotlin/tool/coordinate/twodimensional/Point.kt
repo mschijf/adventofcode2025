@@ -1,6 +1,9 @@
 package tool.coordinate.twodimensional
 
+import tool.coordinate.threedimensional.Point3DLong
+import tool.primarytype.sqr
 import kotlin.math.absoluteValue
+import kotlin.math.sqrt
 
 fun pos(x: Int, y: Int) = Point.of(gridOrientation = true, x,y)
 fun pos(raw:String) = Point.of(gridOrientation = true, raw)
@@ -80,6 +83,7 @@ data class Point private constructor(
     fun allWindDirectionNeighbors() = listOf(north(), northeast(), east(), southeast(), south(), southwest(), west(), northwest())
 
     fun distanceTo(other: Point) = (other.x - x).absoluteValue + (other.y - y).absoluteValue
+    fun eucledianDistance(other: Point): Double = sqrt( 0.0 + (this.x - other.x).sqr() + (this.y - other.y).sqr() )
 
     fun directionToOrNull(other: Point) =
         if (this == other) {
