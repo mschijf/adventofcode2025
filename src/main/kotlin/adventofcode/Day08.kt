@@ -38,23 +38,17 @@ class Day08(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Playground",
     private fun MutableList<MutableSet<Point3DLong>>.addPair(pair: Pair<Point3DLong, Point3DLong>) {
         val circuit1 = this.firstOrNull { pair.first in it }
         val circuit2 = this.firstOrNull { pair.second in it }
-        if (circuit1 != null && circuit2 != null) {
-            if (circuit1 != circuit2) {
-                circuit1.addAll(circuit2)
-                this.remove(circuit2)
-            } else {
-                //both in same circuit --> do nothing
-            }
+        if (circuit1 != null && circuit2 != null && circuit1 != circuit2) {
+            circuit1.addAll(circuit2)
+            this.remove(circuit2)
         } else if (circuit1 == null && circuit2 == null) {
             this.add(mutableSetOf(pair.first, pair.second))
+        } else if (circuit1 != null) {
+            circuit1.add(pair.second)
+        } else if (circuit2 != null) {
+            circuit2.add(pair.first)
         } else {
-            if (circuit1 != null) {
-                circuit1.add(pair.second)
-            } else if (circuit2 != null) {
-                circuit2.add(pair.first)
-            } else {
-                //impossible
-            }
+            //impossible
         }
     }
 
