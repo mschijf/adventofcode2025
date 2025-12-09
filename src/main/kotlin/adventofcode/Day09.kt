@@ -10,7 +10,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    Day09(test=true).showResult()
+    Day09(test=false).showResult()
 }
 
 class Day09(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="TBD", hasInputFile = true) {
@@ -22,14 +22,14 @@ class Day09(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="TBD", hasInp
     }
 
     //1398441360 --> too low
+    //2208965837 --> too high
+    //1498673376 --> correct
     override fun resultPartTwo(): Any {
         val polygon = Polygon(coordinateList)
-
-        return(polygon.containsRectangle(pos(9,5), pos(2,3)))
-
         return coordinateList
             .filterCombinedItems { first, second -> polygon.containsRectangle(first, second) }
-            .maxBy { pair -> rectangleArea(pair.first, pair.second) }
+//            .count()
+            .maxOf { pair -> rectangleArea(pair.first, pair.second) }
     }
 
     private fun rectangleArea(first: Point, second: Point): Long {
@@ -44,74 +44,51 @@ class Polygon(coordinateList: List<Point>) {
         val xCoordinateGroup = coordinateList.groupBy {it.x}
         val yCoordinateGroup = coordinateList.groupBy {it.y}
 
-//        println("------------")
-//        println(xCoordinateGroup.values.filter { it.size != 2 })
-//        println(yCoordinateGroup.values.filter { it.size != 2 })
-//        println("------------")
-
         val verticalLines = xCoordinateGroup.values.flatMap { value -> value.sortedBy{ it.y }.chunked(2).map { LinePiece.of(it[0], it[1]) }}
         val horizontalLines = yCoordinateGroup.values.flatMap { value -> value.sortedBy{ it.x }.chunked(2).map { LinePiece.of(it[0], it[1]) }}
-//        val verticalLines = xCoordinateGroup.values.map { LinePiece.of(it.first(), it.last()) }
-//        val horizontalLines = yCoordinateGroup.values.filter { it.size == 2}.map { LinePiece.of(it.first(), it.last()) }
 
         return verticalLines + horizontalLines
     }
 
     fun containsRectangle(first: Point, second: Point): Boolean {
-        val u0 = pos(min(first.x, second.x), min(first.y, second.y) )
-        val u1 = pos(max(first.x, second.x), min(first.y, second.y))
-        val d0 = pos(min(first.x, second.x), max(first.y, second.y) )
-        val d1 = pos(max(first.x, second.x), max(first.y, second.y))
+        val upperLeft = pos(min(first.x, second.x), min(first.y, second.y) )
+        val lowerRight = pos(max(first.x, second.x), max(first.y, second.y))
 
-        val upperLine = LinePiece.of(u0, u1)
-        val leftLine = LinePiece.of(u0, d0)
-        val rightLine = LinePiece.of(u1, d1)
-        val bottomLine = LinePiece.of(d0, d1)
+        val probablyInPolygon = polygonLineList.none { pLine -> pLine.crossesRectangle(upperLeft, lowerRight) }
+        if (probablyInPolygon) {
+            //there is no polygon line in the rectangle, but it is still possible that whole rectangle is fully outside the polygon.
+            // take the midpoint of the rectangle and count al vertical lines to the right of that point
+            // that should be odd, to lie within the polygon.
 
-        val u = upperLine.crossesPolygonLineList()
-        val l = leftLine.crossesPolygonLineList()
-        val r = rightLine.crossesPolygonLineList()
-        val b = bottomLine.crossesPolygonLineList()
+            if (upperLeft.x == lowerRight.x || upperLeft.y == lowerRight.y)
+                return true //rectangle that is actually a line, is always in (or actually on the edge of) the polygon
 
-        if (u || l || r || b)
+            val midPoint = pos((upperLeft.x + lowerRight.x) / 2, (upperLeft.y + lowerRight.y) / 2)
+
+            val lines = midPoint.countVerticalLinesToTheLeft()
+            if (lines % 2 == 1)
+                return true
+
+//            println("$upperLeft -- $lowerRight")
             return false
-        return true
-
-        if (upperLine.countLinesBelow() % 2 == 0)
+        } else {
             return false
-        if (bottomLine.countLinesBelow() % 2 == 0)
-            return false
+        }
 
-        if (leftLine.countLinesRight() % 2 == 0)
-            return false
-        if (rightLine.countLinesRight() % 2 == 0)
-            return false
-
-        return true
-
-        return !(u || l || r || b)
-
-        return ! (
-                upperLine.crossesPolygonLineList() ||
-                leftLine.crossesPolygonLineList() ||
-                rightLine.crossesPolygonLineList() ||
-                bottomLine.crossesPolygonLineList()
-                )
     }
 
-    private fun LinePiece.crossesPolygonLineList(): Boolean {
-        return polygonLineList.any { pl -> this.crosses(pl) }
+    private fun LinePiece.crossesRectangle(upperLeft: Point, lowerRight: Point): Boolean {
+        return (this.from.x < lowerRight.x && this.to.x > upperLeft.x)
+                &&
+                (this.from.y < lowerRight.y && this.to.y > upperLeft.y)
     }
 
-    private val horLines = polygonLineList.filter { it.isHorizontal }
-    private val verLines = polygonLineList.filter { it.isVertical }
+    private fun Point.countVerticalLinesToTheLeft(): Int {
+        return polygonLineList.count { pLine ->
+            pLine.isVertical && pLine.from.x > this.x && this.y in pLine.from.y..pLine.to.y
+        }
+    }
 
-    private fun LinePiece.countLinesBelow(): Int {
-        return horLines.count { it.from.y >= this.from.y && this.from.x in (it.from.x .. it.to.x) }
-    }
-    private fun LinePiece.countLinesRight(): Int {
-        return verLines.count { it.from.x >= this.from.x && this.from.y in (it.from.y .. it.to.y) }
-    }
 }
 
 data class LinePiece private constructor(val from: Point, val to: Point) {
@@ -124,64 +101,5 @@ data class LinePiece private constructor(val from: Point, val to: Point) {
         }
     }
 
-    val isHorizontal = from.y == to.y
-    val isVertical = from.x == to.x
-
-    fun crosses(otherLine: LinePiece): Boolean {
-        if (this.isHorizontal && otherLine.isHorizontal) {
-            if (this.from.y != otherLine.from.y) //parallel
-                return false
-            if (this.from.x >= otherLine.from.x && this.to.x <= otherLine.to.x) //this ligt in otherLine
-                return false
-            if (this.to.x <= otherLine.from.x || this.from.x >= otherLine.to.x) //this ligt helemaal links of helemaal rechts van otherline
-                return false
-            return true //gedeeltelijk overlappend
-        }
-
-        if (this.isVertical && otherLine.isVertical) {
-            if (this.from.x != otherLine.from.x) //parallel
-                return false
-            if (this.from.y >= otherLine.from.y && this.to.y <= otherLine.to.y) //this ligt in otherLine
-                return false
-            if (this.to.y <= otherLine.from.y || this.from.y >= otherLine.to.y) //this ligt helemaal boven of helemaal onder otherline
-                return false
-            return true //gedeeltelijk overlappend
-        }
-
-        if (this.isHorizontal) {
-            if (this.from.x < otherLine.from.x && this.to.x > otherLine.from.x && otherLine.from.y < this.from.y && otherLine.to.y > this.from.y)
-                return true
-            return false
-        }
-
-        if (this.isVertical) {
-            if (this.from.y < otherLine.from.y && this.to.y > otherLine.from.y && otherLine.from.x < this.from.x && otherLine.to.x > this.from.x)
-                return true
-            return false
-        }
-
-        return false
-    }
+    val isVertical = (from.x == to.x)
 }
-
-//private fun countFrom(fromPoint: Point): Int {
-//    val visited = mutableSetOf<Point>()
-//    var count = 0
-//    val queue = ArrayDeque<Point>()
-//    queue.add(fromPoint)
-//    while (queue.isNotEmpty()) {
-//        val current = queue.removeFirst()
-//        visited += current
-//        //do somethimg with current
-//        // add new nodes arrived from currnet to queue
-//        queue.addAll(
-//            current
-//                .neighbors()
-//                .filter { nb -> nb !in visited}
-//        )
-//    }
-//    return count
-//}
-//
-
-
