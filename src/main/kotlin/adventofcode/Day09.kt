@@ -13,7 +13,7 @@ fun main() {
     Day09(test=false).showResult()
 }
 
-class Day09(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="TBD", hasInputFile = true) {
+class Day09(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Movie Theater", hasInputFile = true) {
 
     private val coordinateList = inputLines.map { pos(it) }
 
