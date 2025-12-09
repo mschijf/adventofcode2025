@@ -1,6 +1,5 @@
 package tool.coordinate.twodimensional
 
-import tool.coordinate.threedimensional.Point3DLong
 import tool.primarytype.sqr
 import kotlin.math.absoluteValue
 import kotlin.math.sqrt
