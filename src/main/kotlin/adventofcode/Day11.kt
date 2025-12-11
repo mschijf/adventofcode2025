@@ -14,42 +14,32 @@ class Day11(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Reactor", ha
 
     override fun resultPartTwo(): Any {
         val deviceMap = inputLines(testFile = "example2").map { Device.of(it) }.associateBy { it.name }
-        val step1 = deviceMap.countPaths("svr", finish = "fft", ignore="dac")
-        val step2 = deviceMap.countPaths("fft", finish = "dac", ignore="")
-        val step3 = deviceMap.countPaths("dac", finish = "out", ignore="")
-//        println ( "$step1 - $step2 - $step3")
-        val step4 = deviceMap.countPaths("svr", finish = "dac", ignore="fft")
-        val step5 = deviceMap.countPaths("dac", finish = "fft", ignore="")
-        val step6 = deviceMap.countPaths("fft", finish = "out", ignore="")
-//        println ( "$step4 - $step5 - $step6")
+
+        //from svr -> ... --> dac --> ... --> fft --> ... --> out
+        val step1 = deviceMap.countPaths("svr", finish = "fft", ignore=setOf("dac", "out") )
+        val step2 = deviceMap.countPaths("fft", finish = "dac", ignore=setOf("out"))
+        val step3 = deviceMap.countPaths("dac", finish = "out", ignore=setOf("fft"))
+
+        //from svr -> ... --> fft --> ... --> dac --> ... --> out
+        val step4 = deviceMap.countPaths("svr", finish = "dac", ignore=setOf("fft", "out"))
+        val step5 = deviceMap.countPaths("dac", finish = "fft", ignore=setOf("out"))
+        val step6 = deviceMap.countPaths("fft", finish = "out", ignore=setOf("dac"))
+
         return step1*step2*step3 + step4*step5*step6
     }
 
-
-    //91840542123453266 too high
-    //349322478796032
-    //10606071 too low
-
-    private fun Map<String, Device>.countPaths(current: String, finish : String, ignore:String = "",
+    private fun Map<String, Device>.countPaths(current: String, finish : String, ignore:Set<String> = emptySet(),
                                                cache: MutableMap<String, Long> = mutableMapOf<String, Long> ()): Long {
-        if (finish != "out" && current == "out")
-            return 0
-
-        if (current == finish) {
+        if (current == finish)
             return 1
-        }
 
-        val key = current
-        if (cache.contains(key)) {
-            return cache[key]!!
-        }
+        if (cache.contains(current))
+            return cache[current]!!
 
-        var sum = 0L
-        this[current]!!.attached.filter { it != ignore }.forEach { deviceName ->
-            val x = countPaths(deviceName, finish, ignore, cache)
-            sum += x
+        val sum = this[current]!!.attached.filter { it !in ignore }.sumOf { deviceName ->
+            countPaths(deviceName, finish, ignore, cache)
         }
-        cache[key] = sum
+        cache[current] = sum
         return sum
     }
 }
