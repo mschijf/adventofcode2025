@@ -13,6 +13,8 @@ class Day10(test: Boolean) : PuzzleSolverAbstract(test, puzzleName="Factory", ha
     }
 
     override fun resultPartTwo(): Any {
+        return "NOT WORKING YET"
+
 //        return machineList[25].minimalButtonsForJoltageLevel()
         var i = 0
         return machineList.sumOf {
