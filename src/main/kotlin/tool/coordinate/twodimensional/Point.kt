@@ -112,6 +112,16 @@ data class Point private constructor(
             null
         }
 
+    fun rotateRightAroundPoint(aPoint: Point) =
+        this.plusXY(-aPoint.x, -aPoint.y).rotateRightAroundOrigin().plusXY(aPoint.x, aPoint.y)
+
+    fun rotateRightAroundOrigin() =
+        if (gridOrientation) {
+            Point(gridOrientation, -this.y, this.x)
+        } else {
+            Point(gridOrientation, this.y, -this.x)
+        }
+
     companion object {
         fun of(gridOrientation: Boolean, input: String): Point = XYPair.of(input).run { Point(gridOrientation, this.x, this.y) }
         fun of(gridOrientation: Boolean, x: Int, y: Int) = Point(gridOrientation, x, y)
