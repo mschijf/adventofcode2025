@@ -72,3 +72,16 @@ fun Long.fac():Long {
 fun Int.fac():Long {
     return this.toLong().fac()
 }
+
+/**
+ * return all combinations in a list of sets.
+ * example we have a list of (a, b, c)
+ * then this functions returns
+ *   (), (a), (b), (c), (a,b), (a,c), (b,c), (a,b,c)
+ *
+ * not necessarily in that order
+ */
+fun <T> List<T>.powerSet(): List<Set<T>> =
+    fold(listOf(emptySet())) { acc, e ->
+        acc + acc.map { it + e }
+    }
